@@ -125,7 +125,10 @@ class _MediaGridItemState extends ConsumerState<MediaGridItem> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.7),
+                  ],
                 ),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(8),

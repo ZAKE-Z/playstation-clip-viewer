@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Image cache with strict rate-limited sequential loading
+/// Image cache with strict sequential loading using a queue
 class ImageCacheService {
   static final ImageCacheService _instance = ImageCacheService._();
   static ImageCacheService get instance => _instance;
@@ -12,14 +12,13 @@ class ImageCacheService {
 
   final Map<String, Uint8List> _cache = {};
   final Map<String, Completer<Uint8List?>> _pending = {};
+  final Queue<_FetchRequest> _queue = Queue();
   final Dio _dio = Dio();
 
-  /// Semaphore to limit concurrent requests
-  int _activeRequests = 0;
-  static const int _maxConcurrent = 2;
-  static const Duration _delayBetweenRequests = Duration(milliseconds: 100);
+  bool _isProcessing = false;
+  static const Duration _delayBetweenRequests = Duration(milliseconds: 150);
 
-  /// Get image bytes from cache or fetch with rate limiting
+  /// Get image bytes from cache or queue for sequential fetch
   Future<Uint8List?> getImage(String url) async {
     final cacheKey = _getCacheKey(url);
 
@@ -33,66 +32,83 @@ class ImageCacheService {
       return _pending[cacheKey]!.future;
     }
 
-    // Create a completer for this request
+    // Create a completer and add to queue
     final completer = Completer<Uint8List?>();
     _pending[cacheKey] = completer;
+    _queue.add(
+      _FetchRequest(url: url, cacheKey: cacheKey, completer: completer),
+    );
 
-    // Wait for a slot to become available
-    await _waitForSlot();
-
-    // Double-check cache after waiting (might have been loaded)
-    if (_cache.containsKey(cacheKey)) {
-      _pending.remove(cacheKey);
-      completer.complete(_cache[cacheKey]);
-      return completer.future;
-    }
-
-    // Fetch the image
-    _fetchImage(url, cacheKey, completer);
+    // Start processing queue if not already running
+    _startProcessing();
 
     return completer.future;
   }
 
-  /// Wait until a request slot is available
-  Future<void> _waitForSlot() async {
-    while (_activeRequests >= _maxConcurrent) {
-      await Future.delayed(const Duration(milliseconds: 50));
+  void _startProcessing() {
+    if (_isProcessing) return;
+    _isProcessing = true;
+    _processNext();
+  }
+
+  Future<void> _processNext() async {
+    if (_queue.isEmpty) {
+      _isProcessing = false;
+      return;
     }
-    _activeRequests++;
-  }
 
-  /// Release a request slot
-  void _releaseSlot() {
-    _activeRequests--;
-  }
+    final request = _queue.removeFirst();
 
-  Future<void> _fetchImage(
-    String url,
-    String cacheKey,
-    Completer<Uint8List?> completer,
-  ) async {
-    try {
-      final response = await _dio.get<List<int>>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
+    // Skip if already cached (loaded by another request)
+    if (_cache.containsKey(request.cacheKey)) {
+      request.completer.complete(_cache[request.cacheKey]);
+      _pending.remove(request.cacheKey);
+      // Process next immediately
+      _processNext();
+      return;
+    }
 
-      if (response.data != null) {
-        final bytes = Uint8List.fromList(response.data!);
-        _cache[cacheKey] = bytes;
-        completer.complete(bytes);
-      } else {
-        completer.complete(null);
+    int attempts = 0;
+    bool success = false;
+    const maxRetries = 3;
+
+    while (attempts < maxRetries && !success) {
+      attempts++;
+      try {
+        final response = await _dio.get<List<int>>(
+          request.url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        if (response.data != null) {
+          final bytes = Uint8List.fromList(response.data!);
+          _cache[request.cacheKey] = bytes;
+          request.completer.complete(bytes);
+          success = true;
+        }
+      } catch (e) {
+        // Only retry if we haven't hit max attempts
+        if (attempts < maxRetries) {
+          debugPrint(
+            'Image fetch error for ${request.cacheKey} (attempt $attempts): $e. Retrying...',
+          );
+          // Backoff delay: 500ms, 1000ms...
+          await Future.delayed(Duration(milliseconds: 500 * attempts));
+        } else {
+          debugPrint('Image fetch failed after $maxRetries attempts: $e');
+        }
       }
-    } catch (e) {
-      debugPrint('Image fetch error: $e');
-      completer.complete(null);
-    } finally {
-      _pending.remove(cacheKey);
-      _releaseSlot();
-      // Small delay between requests to avoid bursts
-      await Future.delayed(_delayBetweenRequests);
     }
+
+    if (!success) {
+      request.completer.complete(null);
+    }
+
+    _pending.remove(request.cacheKey);
+
+    // Wait before next request
+    await Future.delayed(_delayBetweenRequests);
+    _processNext();
   }
 
   String _getCacheKey(String url) {
@@ -106,4 +122,17 @@ class ImageCacheService {
   }
 
   int get cacheSize => _cache.length;
+  int get queueSize => _queue.length;
+}
+
+class _FetchRequest {
+  final String url;
+  final String cacheKey;
+  final Completer<Uint8List?> completer;
+
+  _FetchRequest({
+    required this.url,
+    required this.cacheKey,
+    required this.completer,
+  });
 }
