@@ -39,7 +39,7 @@
 ---
 
 ### Phase 3: Clips Gallery
-**Status**: ⬜ Not Started  
+**Status**: ✅ Complete  
 **Objective**: Display user's clips and screenshots in a grid
 
 - Implement clips API integration
@@ -47,7 +47,7 @@
 - Build gallery screen with grid layout
 - Display thumbnails for each item
 - Handle pagination / lazy loading
-- Cache metadata locally
+- Rate-limited image caching
 
 ---
 

@@ -13,14 +13,48 @@ class PsnMediaException implements Exception {
   String toString() => 'PsnMediaException: $message';
 }
 
+/// CloudFront credentials required for accessing media URLs
+class CloudFrontCookies {
+  final String keyPairId;
+  final String signature;
+  final String policy;
+
+  const CloudFrontCookies({
+    required this.keyPairId,
+    required this.signature,
+    required this.policy,
+  });
+
+  /// Append CloudFront query parameters to a URL
+  String signUrl(String url) {
+    final separator = url.contains('?') ? '&' : '?';
+    // URL-encode the signature and policy values
+    final encodedSignature = Uri.encodeComponent(signature);
+    final encodedPolicy = Uri.encodeComponent(policy);
+    return '$url${separator}Key-Pair-Id=$keyPairId&Signature=$encodedSignature&Policy=$encodedPolicy';
+  }
+
+  @override
+  String toString() =>
+      'CloudFrontCookies(keyPairId: ${keyPairId.substring(0, 10)}...)';
+}
+
+/// Result containing both media response and cookies
+class MediaGalleryResult {
+  final MediaGalleryResponse response;
+  final CloudFrontCookies? cookies;
+
+  const MediaGalleryResult({required this.response, this.cookies});
+}
+
 /// Service for fetching media from PSN
 class PsnMediaService {
   final Dio _dio;
 
   PsnMediaService({Dio? dio}) : _dio = dio ?? Dio();
 
-  /// Fetch media gallery page
-  Future<MediaGalleryResponse> getMediaGallery({
+  /// Fetch media gallery page with CloudFront cookies
+  Future<MediaGalleryResult> getMediaGallery({
     required String accessToken,
     String? cursor,
     int limit = 20,
@@ -35,8 +69,14 @@ class PsnMediaService {
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
 
-      return MediaGalleryResponse.fromJson(
-        response.data as Map<String, dynamic>,
+      // Extract CloudFront cookies from response headers
+      final cookies = _extractCloudFrontCookies(response.headers);
+
+      return MediaGalleryResult(
+        response: MediaGalleryResponse.fromJson(
+          response.data as Map<String, dynamic>,
+        ),
+        cookies: cookies,
       );
     } on DioException catch (e) {
       throw PsnMediaException(
@@ -44,5 +84,44 @@ class PsnMediaService {
         statusCode: e.response?.statusCode,
       );
     }
+  }
+
+  /// Extract CloudFront cookies from Set-Cookie headers
+  CloudFrontCookies? _extractCloudFrontCookies(Headers headers) {
+    final setCookies = headers['set-cookie'];
+    if (setCookies == null || setCookies.isEmpty) return null;
+
+    String? keyPairId;
+    String? signature;
+    String? policy;
+
+    for (final cookie in setCookies) {
+      if (cookie.startsWith('CloudFront-Key-Pair-Id=')) {
+        keyPairId = _extractCookieValue(cookie, 'CloudFront-Key-Pair-Id');
+      } else if (cookie.startsWith('CloudFront-Signature=')) {
+        signature = _extractCookieValue(cookie, 'CloudFront-Signature');
+      } else if (cookie.startsWith('CloudFront-Policy=')) {
+        policy = _extractCookieValue(cookie, 'CloudFront-Policy');
+      }
+    }
+
+    if (keyPairId != null && signature != null && policy != null) {
+      return CloudFrontCookies(
+        keyPairId: keyPairId,
+        signature: signature,
+        policy: policy,
+      );
+    }
+    return null;
+  }
+
+  /// Extract value from a Set-Cookie header
+  String _extractCookieValue(String cookie, String name) {
+    final start = cookie.indexOf('$name=') + name.length + 1;
+    final end = cookie.indexOf(';', start);
+    if (end == -1) {
+      return cookie.substring(start);
+    }
+    return cookie.substring(start, end);
   }
 }

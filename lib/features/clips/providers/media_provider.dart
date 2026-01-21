@@ -11,6 +11,17 @@ PsnMediaService psnMediaService(Ref ref) {
   return PsnMediaService();
 }
 
+/// CloudFront cookies provider - stores cookies from last API call
+@Riverpod(keepAlive: true)
+class CloudFrontCookiesNotifier extends _$CloudFrontCookiesNotifier {
+  @override
+  CloudFrontCookies? build() => null;
+
+  void setCookies(CloudFrontCookies? cookies) {
+    state = cookies;
+  }
+}
+
 /// State for paginated media list
 class MediaListState {
   final List<MediaItem> items;
@@ -56,13 +67,16 @@ class MediaList extends _$MediaList {
 
     try {
       final mediaService = ref.read(psnMediaServiceProvider);
-      final response = await mediaService.getMediaGallery(
+      final result = await mediaService.getMediaGallery(
         accessToken: authState.tokens.accessToken,
       );
 
+      // Store the CloudFront cookies for image requests
+      ref.read(cloudFrontCookiesProvider.notifier).setCookies(result.cookies);
+
       return MediaListState(
-        items: response.ugcDocument,
-        nextCursor: response.nextCursorMark,
+        items: result.response.ugcDocument,
+        nextCursor: result.response.nextCursorMark,
       );
     } catch (e) {
       return MediaListState(error: e.toString());
@@ -85,15 +99,18 @@ class MediaList extends _$MediaList {
 
     try {
       final mediaService = ref.read(psnMediaServiceProvider);
-      final response = await mediaService.getMediaGallery(
+      final result = await mediaService.getMediaGallery(
         accessToken: authState.tokens.accessToken,
         cursor: currentState.nextCursor,
       );
 
+      // Update cookies (they may refresh)
+      ref.read(cloudFrontCookiesProvider.notifier).setCookies(result.cookies);
+
       state = AsyncValue.data(
         MediaListState(
-          items: [...currentState.items, ...response.ugcDocument],
-          nextCursor: response.nextCursorMark,
+          items: [...currentState.items, ...result.response.ugcDocument],
+          nextCursor: result.response.nextCursorMark,
         ),
       );
     } catch (e) {

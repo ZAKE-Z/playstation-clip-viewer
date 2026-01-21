@@ -55,6 +55,67 @@ final class PsnMediaServiceProvider
 
 String _$psnMediaServiceHash() => r'a793b48fe39b8dc06a70a5e0b0fdf63589e5bf73';
 
+/// CloudFront cookies provider - stores cookies from last API call
+
+@ProviderFor(CloudFrontCookiesNotifier)
+const cloudFrontCookiesProvider = CloudFrontCookiesNotifierProvider._();
+
+/// CloudFront cookies provider - stores cookies from last API call
+final class CloudFrontCookiesNotifierProvider
+    extends $NotifierProvider<CloudFrontCookiesNotifier, CloudFrontCookies?> {
+  /// CloudFront cookies provider - stores cookies from last API call
+  const CloudFrontCookiesNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'cloudFrontCookiesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$cloudFrontCookiesNotifierHash();
+
+  @$internal
+  @override
+  CloudFrontCookiesNotifier create() => CloudFrontCookiesNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CloudFrontCookies? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CloudFrontCookies?>(value),
+    );
+  }
+}
+
+String _$cloudFrontCookiesNotifierHash() =>
+    r'83d8114db58e069a662a7511ab2531b5a3484448';
+
+/// CloudFront cookies provider - stores cookies from last API call
+
+abstract class _$CloudFrontCookiesNotifier
+    extends $Notifier<CloudFrontCookies?> {
+  CloudFrontCookies? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<CloudFrontCookies?, CloudFrontCookies?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<CloudFrontCookies?, CloudFrontCookies?>,
+              CloudFrontCookies?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 /// Media list notifier with pagination
 
 @ProviderFor(MediaList)
@@ -83,7 +144,7 @@ final class MediaListProvider
   MediaList create() => MediaList();
 }
 
-String _$mediaListHash() => r'69647a4e483f3f60e2e0745d752a37b60535597a';
+String _$mediaListHash() => r'643f02e4bf167b55ec871ee2f1602432f7842ff9';
 
 /// Media list notifier with pagination
 

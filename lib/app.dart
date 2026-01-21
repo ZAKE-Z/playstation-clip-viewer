@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'features/clips/presentation/gallery_screen.dart';
 
 class PsClipsApp extends ConsumerWidget {
   const PsClipsApp({super.key});
@@ -37,31 +38,7 @@ class _AuthWrapper extends ConsumerWidget {
           Scaffold(body: Center(child: Text('Error: $error'))),
       data: (state) {
         if (state is Authenticated) {
-          // TODO: Show clips gallery (Phase 3)
-          return Scaffold(
-            appBar: AppBar(title: const Text('PS Clips')),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.check_circle, size: 64, color: Colors.green),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Logged in!',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('Clips gallery coming in Phase 3'),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => ref.read(authProvider.notifier).logout(),
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Logout'),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return const GalleryScreen();
         }
         if (state is AuthError) {
           return Scaffold(
