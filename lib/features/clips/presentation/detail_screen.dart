@@ -32,7 +32,8 @@ class _DetailScreenState extends State<DetailScreen> {
   Future<void> _initializePlayer() async {
     try {
       // Get signed video URL
-      String videoUrl = widget.item.videoUrl ?? widget.item.downloadUrl ?? '';
+      // Priority: downloadUrl (MP4) > videoUrl (HLS) because video_player_win lacks HLS support
+      String videoUrl = widget.item.downloadUrl ?? widget.item.videoUrl ?? '';
       if (videoUrl.isEmpty) {
         throw Exception('No video URL found');
       }
