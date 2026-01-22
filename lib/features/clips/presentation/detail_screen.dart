@@ -47,6 +47,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
+        hideControlsTimer: const Duration(seconds: 1),
         autoPlay: true,
         looping: true,
         aspectRatio: _videoController!.value.aspectRatio,
