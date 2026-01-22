@@ -1,14 +1,14 @@
 # ROADMAP.md
 
-> **Current Phase**: 1 (Complete)  
+> **Current Phase**: 5 (Complete)  
 > **Milestone**: v1.0
 
 ## Must-Haves (from SPEC)
 
-- [ ] WebView-based PSN authentication with token persistence
-- [ ] Clips/screenshots grid view with thumbnails
-- [ ] Metadata display for each item
-- [ ] Download via native file picker
+- [x] WebView-based PSN authentication with token persistence
+- [x] Clips/screenshots grid view with thumbnails
+- [x] Metadata display for each item
+- [x] Download via native file picker
 
 ## Phases
 
@@ -52,7 +52,7 @@
 ---
 
 ### Phase 4: Preview & Download
-**Status**: ⬜ Not Started  
+**Status**: ✅ Complete  
 **Objective**: View details and download media
 
 - Create detail view for selected item
@@ -65,7 +65,7 @@
 ---
 
 ### Phase 5: Polish & Release
-**Status**: ⬜ Not Started  
+**Status**: ✅ Complete  
 **Objective**: Final touches for daily-driver quality
 
 - Error handling and retry logic

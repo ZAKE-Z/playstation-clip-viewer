@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/services/psn_auth_service.dart';
 import '../../../core/storage/token_storage.dart';
+import '../presentation/psn_login_webview.dart';
 import '../data/token_model.dart';
 
 part 'auth_provider.g.dart';
@@ -64,6 +65,9 @@ class Auth extends _$Auth {
 
   /// Logout
   Future<void> logout() async {
+    // Clear server-side session and webview data
+    await PsnLoginWebview.logout();
+
     final authService = ref.read(psnAuthServiceProvider);
     await authService.logout();
     state = AsyncValue.data(Unauthenticated());

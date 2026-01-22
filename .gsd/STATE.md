@@ -5,29 +5,26 @@
 ## Current Position
 
 - **Milestone**: v1.0
-- **Phase**: 4 (Preview & Download)
-- **Task**: Planning complete
-- **Status**: Ready for execution
+- **Phase**: 5 (Polish & Release)
+- **Task**: Execution complete
+- **Status**: Released (v1.0.0)
 
 ## What Was Just Accomplished
 
-### Phase 3 Execution
-- **Plan 3.1**: Media data models (MediaItem, MediaGalleryResponse)
-- **Plan 3.2**: PSN media API service with CloudFront cookie extraction
-- **Plan 3.3**: Gallery UI components with rate-limited image caching
-- **Plan 3.4**: Gallery screen with infinite scroll and pull-to-refresh
+### Critical Fixes
+- **Auth**: Fixed premature NPSSO extraction and incomplete logout.
+- **Stability**: Ensured correct session handling for multiple accounts.
 
-### Key Implementation Details
-- CloudFront signed URLs for image access (Key-Pair-Id, Signature, Policy as query params)
-- ImageCacheService with semaphore-based rate limiting (max 2 concurrent + 100ms delay)
-- Fixed image loading to prevent 403 rate limit errors
+### Phase 5: Polish
+- **UI**: Added empty states, error handling retry, and refresh indicators.
+- **Window**: Configured 1024x768 initial size and "PS Clips" title using `window_manager`.
+- **Packaging**: Built release version and packaged into `psclips-v1.0.0.zip`.
 
 ## Verification
-- ✅ User confirmed gallery displays correctly
-- ✅ Images load sequentially without rate limiting
-- ✅ `dart analyze lib/` passes
+- ✅ `flutter build windows --release` builds successfully.
+- ✅ `psclips-v1.0.0.zip` created (11MB).
+- ✅ Login flow verified by user.
 
 ## Next Steps
 
-1. Run `/plan 4` to plan Phase 4 (Preview & Download)
-2. Run `/execute 4` to implement detail view and download functionality
+1. Enjoy your clips!

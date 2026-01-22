@@ -26,4 +26,8 @@ class PsnApi {
 
   /// Domain to check for NPSSO cookie
   static const String cookieDomain = 'ca.account.sony.com';
+
+  /// Logout URL to clear server-side session
+  static const String logoutUrl =
+      'https://web.np.playstation.com/api/session/v1//signout?redirect_uri=https://io.playstation.com/central/auth/logout?locale=en_US';
 }

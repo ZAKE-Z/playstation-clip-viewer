@@ -41,67 +41,110 @@ class GalleryScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 60, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () => ref.invalidate(mediaListProvider),
+              Text(
+                'Something went wrong',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  error.toString().replaceAll('Exception: ', ''),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => ref.read(mediaListProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: const Text('Try Again'),
               ),
             ],
           ),
         ),
         data: (state) {
           if (state.items.isEmpty && state.error == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+              onRefresh: () async {
+                ImageCacheService.instance.clearCache();
+                await ref.read(mediaListProvider.notifier).refresh();
+              },
+              child: Stack(
                 children: [
-                  const Icon(
-                    Icons.photo_library_outlined,
-                    size: 64,
-                    color: Colors.grey,
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 200), // Push content down
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text('No clips found'),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () =>
-                        ref.read(mediaListProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh'),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.photo_library_outlined,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'No clips found',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Pull to refresh or check back later',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.tonalIcon(
+                          onPressed: () =>
+                              ref.read(mediaListProvider.notifier).refresh(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh Now'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 16 / 9,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: state.items.length,
-            itemBuilder: (context, index) {
-              final item = state.items[index];
-              return MediaGridItem(
-                item: item,
-                onTap: () {
-                  final cookies = ref.read(cloudFrontCookiesProvider);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DetailScreen(item: item, cookies: cookies),
-                    ),
-                  );
-                },
-              );
+          return RefreshIndicator(
+            onRefresh: () async {
+              ImageCacheService.instance.clearCache();
+              await ref.read(mediaListProvider.notifier).refresh();
             },
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 16 / 9,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: state.items.length,
+              itemBuilder: (context, index) {
+                final item = state.items[index];
+                return MediaGridItem(
+                  item: item,
+                  onTap: () {
+                    final cookies = ref.read(cloudFrontCookiesProvider);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetailScreen(item: item, cookies: cookies),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           );
         },
       ),
