@@ -5,9 +5,9 @@
 
 ## Must-Haves
 - [x] Test infrastructure setup (mockito, build_runner)
-- [ ] Unit tests for NPSSO exchange logic
+- [x] Unit tests for NPSSO exchange logic
 - [ ] Unit tests for Token Refresh logic (expiration checks, storage)
-- [ ] Verify `PsnAuthService` handles network errors gracefully
+- [x] Verify `PsnAuthService` handles network errors gracefully
 
 ## Phases
 
@@ -20,7 +20,7 @@
 - Set up test helpers and fixtures
 
 ### Phase 2: Auth Logic Verification
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Test the core authentication exchange flow
 
 - Test `PsnAuthService.exchangeNpssoForCode`

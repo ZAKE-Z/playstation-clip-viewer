@@ -6,11 +6,19 @@
 
 - **Milestone**: v1.1-testing
 - **Phase**: 2 (Auth Logic Verification)
-- **Task**: Planning complete
-- **Status**: Ready for execution
+- **Task**: Execution complete
+- **Status**: Verified
+
+## What Was Just Accomplished
+
+### Phase 2: Auth Logic Verification
+- **Verified**: NPSSO exchange logic with mocked 302 redirect.
+- **Verified**: Token exchange logic with mocked 200 response.
+- **Verified**: Error handling for network drops and API errors.
 
 ## Next Steps
-1. /execute 2
+1. /plan 3 (Token Management & Refresh)
+2. /execute 3
 - **Dependencies**: Added `mockito` and `build_runner`.
 - **Mocks**: Defined and generated mocks for `FlutterSecureStorage` and `Dio`.
 - **Verification**: `dart run build_runner build` passed successfully.
