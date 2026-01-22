@@ -4,100 +4,49 @@ plan: 1
 wave: 1
 ---
 
-# Plan 3.1: Media Data Models
+# Plan 3.1: Token Verification & Lifecycle
 
 ## Objective
-Create Freezed data models for PSN media items and API responses. This is foundational for the API service and UI.
+Implement comprehensive unit tests for `TokenStorage` and the auto-refresh logic in `PsnAuthService`. This ensures that user sessions are persisted correctly and securely refreshed when expired, handling the "happy path" and potential failures/rollbacks.
 
 ## Context
-- .gsd/phases/3/RESEARCH.md
-- old/server/psn-types.py (reference for field structure)
-- lib/features/auth/data/token_model.dart (pattern to follow)
+- .gsd/SPEC.md
+- lib/core/storage/token_storage.dart
+- lib/core/services/psn_auth_service.dart
+- test/mocks/mock_definitions.dart
 
 ## Tasks
 
 <task type="auto">
-  <name>Create media item model</name>
-  <files>lib/features/clips/data/media_item.dart</files>
+  <name>Test TokenStorage</name>
+  <files>test/core/storage/token_storage_test.dart</files>
   <action>
-    Create lib/features/clips/data/media_item.dart with Freezed:
-    
-    ```dart
-    import 'package:freezed_annotation/freezed_annotation.dart';
-    
-    part 'media_item.freezed.dart';
-    part 'media_item.g.dart';
-    
-    /// Type of media content
-    enum MediaType {
-      @JsonValue(1)
-      screenshot,
-      @JsonValue(2)
-      video,
-    }
-    
-    /// A single clip or screenshot from PlayStation
-    @freezed
-    abstract class MediaItem with _$MediaItem {
-      const factory MediaItem({
-        required String id,
-        required String title,
-        @JsonKey(name: 'scePlatform') required String platform,
-        @JsonKey(name: 'sceTitleName') required String gameName,
-        @JsonKey(name: 'uploadDate') required String uploadDate,
-        @JsonKey(name: 'ugcType') required MediaType mediaType,
-        @JsonKey(name: 'smallPreviewImage') required String thumbnailUrl,
-        @JsonKey(name: 'largePreviewImage') required String previewUrl,
-        @JsonKey(name: 'videoDuration') double? videoDuration,
-        @JsonKey(name: 'videoUrl') String? videoUrl,
-        @JsonKey(name: 'screenshotUrl') String? screenshotUrl,
-        @JsonKey(name: 'downloadUrl') String? downloadUrl,
-        @JsonKey(name: 'fileSize') int? fileSize,
-        String? resolution,
-      }) = _MediaItem;
-    
-      factory MediaItem.fromJson(Map<String, dynamic> json) =>
-          _$MediaItemFromJson(json);
-    }
-    ```
+    Create `test/core/storage/token_storage_test.dart`.
+    Implement tests for:
+    - `saveTokens`: Verifies serialization and call to `FlutterSecureStorage.write`.
+    - `loadTokens`: Verifies deserialization from valid JSON.
+    - `loadTokens` (Corrupt): Verifies that invalid JSON triggers `clearTokens` and returns null.
+    - `clearTokens`: Verifies call to `FlutterSecureStorage.delete`.
   </action>
-  <verify>dart analyze lib/features/clips/data/media_item.dart</verify>
-  <done>media_item.dart created with all PSN fields mapped</done>
+  <verify>flutter test test/core/storage/token_storage_test.dart</verify>
+  <done>All storage operations verified with mocks</done>
 </task>
 
 <task type="auto">
-  <name>Create media gallery response model</name>
-  <files>lib/features/clips/data/media_gallery_response.dart</files>
+  <name>Test Auto-Refresh Logic</name>
+  <files>test/core/services/psn_auth_service_test.dart</files>
   <action>
-    Create lib/features/clips/data/media_gallery_response.dart:
-    
-    ```dart
-    import 'package:freezed_annotation/freezed_annotation.dart';
-    import 'media_item.dart';
-    
-    part 'media_gallery_response.freezed.dart';
-    part 'media_gallery_response.g.dart';
-    
-    /// Response from PSN media gallery API
-    @freezed
-    abstract class MediaGalleryResponse with _$MediaGalleryResponse {
-      const factory MediaGalleryResponse({
-        @JsonKey(name: 'ugcDocument') required List<MediaItem> items,
-        @JsonKey(name: 'nextCursorMark') String? nextCursor,
-        int? limit,
-      }) = _MediaGalleryResponse;
-    
-      factory MediaGalleryResponse.fromJson(Map<String, dynamic> json) =>
-          _$MediaGalleryResponseFromJson(json);
-    }
-    ```
+    Append `group('PsnAuthService.getValidTokens')` to the existing test file:
+    - `returns tokens if valid`: Mock storage returning young tokens. Verify no network call.
+    - `refreshes if access token expired`: Mock storage returning old access token. Mock Dio refresh response. Verify `refreshTokens` called.
+    - `clears tokens if refresh token expired`: Mock storage returning old refresh token. Verify `clearTokens` called.
+    - `clears tokens if refresh fails`: Mock refresh API failure. Verify `clearTokens` called.
   </action>
-  <verify>dart run build_runner build --delete-conflicting-outputs</verify>
-  <done>Both models generated with freezed, no build errors</done>
+  <verify>flutter test test/core/services/psn_auth_service_test.dart --plain-name "PsnAuthService.getValidTokens"</verify>
+  <done>Lifecycle logic verified</done>
 </task>
 
 ## Success Criteria
-- [ ] MediaItem model with all PSN fields
-- [ ] MediaGalleryResponse model for pagination
-- [ ] Build runner generates .freezed.dart and .g.dart files
-- [ ] `dart analyze lib/` passes
+- [ ] Token persistence is verified against `FlutterSecureStorage` mocks
+- [ ] Application correctly handles expired sessions (both access and refresh)
+- [ ] Application correctly recovers logic (refresh) vs. fails safe (logout)
