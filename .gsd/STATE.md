@@ -4,16 +4,17 @@
 
 ## Current Position
 
-- **Milestone**: v1.0
-- **Phase**: 5 (Polish & Release)
-- **Task**: Execution complete
-- **Status**: Released (v1.0.0)
+- **Milestone**: v1.1-testing
+- **Phase**: Not started
+- **Task**: Milestone planning complete
+- **Status**: Ready to start Phase 1
 
 ## What Was Just Accomplished
 
-### Critical Fixes
-- **Auth**: Fixed premature NPSSO extraction and incomplete logout.
-- **Stability**: Ensured correct session handling for multiple accounts.
+### Milestone Planning
+- **Created**: v1.1-testing (Comprehensive Unit Testing).
+- **Phases**: Defined 3 phases focusing on Test Foundation, Auth Logic, and Token Management.
+- **Roadmap**: Updated `ROADMAP.md` with new goals and archived v1.0 history.
 
 ### Phase 5: Polish
 - **UI**: Added empty states, error handling retry, and refresh indicators.

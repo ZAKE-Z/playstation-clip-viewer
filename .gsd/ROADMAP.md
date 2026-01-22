@@ -1,75 +1,50 @@
 # ROADMAP.md
 
-> **Current Phase**: 5 (Complete)  
-> **Milestone**: v1.0
+> **Current Milestone**: v1.1-testing
+> **Goal**: Comprehensive unit testing to verify authentication flow and token stability.
 
-## Must-Haves (from SPEC)
-
-- [x] WebView-based PSN authentication with token persistence
-- [x] Clips/screenshots grid view with thumbnails
-- [x] Metadata display for each item
-- [x] Download via native file picker
+## Must-Haves
+- [ ] Test infrastructure setup (mockito, build_runner)
+- [ ] Unit tests for NPSSO exchange logic
+- [ ] Unit tests for Token Refresh logic (expiration checks, storage)
+- [ ] Verify `PsnAuthService` handles network errors gracefully
 
 ## Phases
 
-### Phase 1: Project Foundation
-**Status**: ✅ Complete  
-**Objective**: Set up project structure, dependencies, and core services
+### Phase 1: Test Foundation
+**Status**: ⬜ Not Started
+**Objective**: Configure testing environment and generate mocks
 
-- Configure Flutter for Windows desktop
-- Add dependencies (dio, flutter_secure_storage, riverpod, etc.)
-- Create project folder structure
-- Implement PSN API client (auth flow: NPSSO → code → tokens)
-- Implement secure token storage with auto-refresh
+- Add `mockito` and `build_runner` dependencies
+- Create mock classes for `FlutterSecureStorage` and `Dio`
+- Set up test helpers and fixtures
 
----
+### Phase 2: Auth Logic Verification
+**Status**: ⬜ Not Started
+**Objective**: Test the core authentication exchange flow
 
-### Phase 2: Authentication UI
-**Status**: ✅ Complete  
-**Objective**: WebView login flow with persistent sessions
+- Test `PsnAuthService.exchangeNpssoForCode`
+- Test `PsnAuthService.exchangeCodeForTokens`
+- Verify correct parsing of API responses
+- Verify error handling for invalid grants
 
-- Add desktop_webview_window package
-- Create login screen with "Sign in with PlayStation" button
-- Implement WebView that opens PSN login
-- Extract NPSSO cookie after successful login
-- Exchange NPSSO for access/refresh tokens
-- Persist tokens for future launches
-- Handle token refresh on app start
+### Phase 3: Token Management & Refresh
+**Status**: ⬜ Not Started
+**Objective**: Verify long-term session stability
 
----
-
-### Phase 3: Clips Gallery
-**Status**: ✅ Complete  
-**Objective**: Display user's clips and screenshots in a grid
-
-- Implement clips API integration
-- Create clip data model
-- Build gallery screen with grid layout
-- Display thumbnails for each item
-- Handle pagination / lazy loading
-- Rate-limited image caching
+- Test `TokenStorage` read/write operations
+- Test `PsnAuthService.refreshAccessToken`
+- Verify token expiry calculation
+- Verify automatic refresh triggers when loading valid tokens
 
 ---
 
-### Phase 4: Preview & Download
-**Status**: ✅ Complete  
-**Objective**: View details and download media
+## History
 
-- Create detail view for selected item
-- Display metadata (game, date, duration, type)
-- Integrate video player for clip preview
-- Implement download with native file picker
-- Handle CloudFront cookie authentication for downloads
-- Show download progress
-
----
-
-### Phase 5: Polish & Release
-**Status**: ✅ Complete  
-**Objective**: Final touches for daily-driver quality
-
-- Error handling and retry logic
-- Loading states and empty states
-- App icon and branding
-- Windows build configuration
-- User testing and bug fixes
+### v1.0 (Released)
+> **Goal**: Desktop app for viewing and downloading PSN clips.
+- ✅ **Phase 1**: Project Foundation
+- ✅ **Phase 2**: Authentication UI
+- ✅ **Phase 3**: Clips Gallery
+- ✅ **Phase 4**: Preview & Download
+- ✅ **Phase 5**: Polish & Release
