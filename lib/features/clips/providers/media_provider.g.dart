@@ -144,7 +144,7 @@ final class MediaListProvider
   MediaList create() => MediaList();
 }
 
-String _$mediaListHash() => r'643f02e4bf167b55ec871ee2f1602432f7842ff9';
+String _$mediaListHash() => r'299b93353fc8ab09f600b19da0976b29e3b62a65';
 
 /// Media list notifier with pagination
 
