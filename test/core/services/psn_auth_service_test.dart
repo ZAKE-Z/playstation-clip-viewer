@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:psclips/core/services/psn_auth_service.dart';
+
+import 'package:psclips/features/auth/data/token_model.dart';
 
 import '../../mocks/mock_definitions.mocks.dart';
 
@@ -9,6 +13,13 @@ void main() {
   late PsnAuthService authService;
   late MockDio mockDio;
   late MockTokenStorage mockTokenStorage;
+
+  final testTokens = PsnTokens(
+    accessToken: 'access_123',
+    refreshToken: 'refresh_123',
+    expiresAt: DateTime.now().add(const Duration(hours: 1)),
+    refreshExpiresAt: DateTime.now().add(const Duration(days: 60)),
+  );
 
   setUp(() {
     mockDio = MockDio();
@@ -84,6 +95,12 @@ void main() {
       // Assert
       expect(result.accessToken, accessToken);
       expect(result.refreshToken, refreshToken);
+      // Verify expires_in conversion (allow 1s delta for execution time)
+      final expectedExpiry = DateTime.now().add(Duration(seconds: expiresIn));
+      expect(
+        result.expiresAt.difference(expectedExpiry).inSeconds.abs(),
+        lessThanOrEqualTo(1),
+      );
       verify(mockTokenStorage.saveTokens(any)).called(1);
     });
   });
@@ -126,6 +143,82 @@ void main() {
         () => authService.getTokensFromCode('bad_code'),
         throwsA(isA<PsnAuthException>()),
       );
+    });
+  });
+
+  group('PsnAuthService.getValidTokens', () {
+    test('returns tokens directly if valid', () async {
+      when(mockTokenStorage.loadTokens()).thenAnswer((_) async => testTokens);
+
+      final result = await authService.getValidTokens();
+
+      expect(result, testTokens);
+      verifyZeroInteractions(mockDio);
+    });
+
+    test('refreshes if access token is expired', () async {
+      final expiredTokens = testTokens.copyWith(
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      when(
+        mockTokenStorage.loadTokens(),
+      ).thenAnswer((_) async => expiredTokens);
+
+      when(
+        mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 200,
+          data: {
+            'access_token': 'new_access',
+            'refresh_token': 'new_refresh',
+            'expires_in': 3600,
+            'refresh_token_expires_in': 3600 * 24,
+          },
+        ),
+      );
+
+      final result = await authService.getValidTokens();
+
+      expect(result?.accessToken, 'new_access');
+      expect(result?.refreshToken, 'new_refresh');
+      verify(mockTokenStorage.saveTokens(any)).called(1);
+    });
+
+    test('clears tokens if refresh token is expired', () async {
+      final oldRefreshTokens = testTokens.copyWith(
+        refreshExpiresAt: DateTime.now().subtract(const Duration(days: 1)),
+      );
+
+      when(
+        mockTokenStorage.loadTokens(),
+      ).thenAnswer((_) async => oldRefreshTokens);
+
+      final result = await authService.getValidTokens();
+
+      expect(result, isNull);
+      verify(mockTokenStorage.clearTokens()).called(1);
+    });
+
+    test('clears tokens if refresh fails', () async {
+      final expiredTokens = testTokens.copyWith(
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      when(
+        mockTokenStorage.loadTokens(),
+      ).thenAnswer((_) async => expiredTokens);
+
+      when(
+        mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
+      ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+
+      final result = await authService.getValidTokens();
+
+      expect(result, isNull);
+      verify(mockTokenStorage.clearTokens()).called(1);
     });
   });
 }
