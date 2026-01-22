@@ -6,7 +6,7 @@
 ## Must-Haves
 - [x] Test infrastructure setup (mockito, build_runner)
 - [x] Unit tests for NPSSO exchange logic
-- [ ] Unit tests for Token Refresh logic (expiration checks, storage)
+- [x] Unit tests for Token Refresh logic (expiration checks, storage)
 - [x] Verify `PsnAuthService` handles network errors gracefully
 
 ## Phases
@@ -29,12 +29,12 @@
 - Verify error handling for invalid grants
 
 ### Phase 3: Token Management & Refresh
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Verify long-term session stability
 
-- Test `TokenStorage` read/write operations
-- Test `PsnAuthService.refreshAccessToken`
-- Verify token expiry calculation
+- Test `TokenStorage` persistence
+- Verify `PsnAuthService.getValidTokens` auto-refresh logic
+- Test session expiration and logout triggerson
 - Verify automatic refresh triggers when loading valid tokens
 
 ---

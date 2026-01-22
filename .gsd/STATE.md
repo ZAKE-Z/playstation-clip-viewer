@@ -6,11 +6,20 @@
 
 - **Milestone**: v1.1-testing
 - **Phase**: 3 (Token Management & Refresh)
-- **Task**: Planning complete
-- **Status**: Ready for execution
+- **Task**: Execution complete
+- **Status**: Verified
+
+## What Was Just Accomplished
+
+### Phase 3: Token Management & Refresh
+- **Verified**: Token persistence logic with `TokenStorage` tests.
+- **Verified**: Auto-refresh logic (access token expiry) with `PsnAuthService` tests.
+- **Verified**: Fail-safe logout logic (refresh token expiry).
+- **Verified**: Expiration arithmetic (relative `expires_in` to absolute `expiresAt`).
 
 ## Next Steps
-1. /execute 3
+1. Milestone v1.1-testing COMPLETE
+2. /new-milestone v1.2-features
 - **Verified**: NPSSO exchange logic with mocked 302 redirect.
 - **Verified**: Token exchange logic with mocked 200 response.
 - **Verified**: Error handling for network drops and API errors.
