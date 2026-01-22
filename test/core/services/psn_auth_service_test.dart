@@ -87,4 +87,45 @@ void main() {
       verify(mockTokenStorage.saveTokens(any)).called(1);
     });
   });
+
+  group('PsnAuthService Error Handling', () {
+    test('getCodeFromNpsso throws on network error', () async {
+      when(
+        mockDio.get(
+          any,
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+        ),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          message: 'Network error',
+        ),
+      );
+
+      expect(
+        () => authService.getCodeFromNpsso('test_npsso'),
+        throwsA(isA<PsnAuthException>()),
+      );
+    });
+
+    test('getTokensFromCode throws on API error', () async {
+      when(
+        mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          response: Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 400,
+          ),
+        ),
+      );
+
+      expect(
+        () => authService.getTokensFromCode('bad_code'),
+        throwsA(isA<PsnAuthException>()),
+      );
+    });
+  });
 }
