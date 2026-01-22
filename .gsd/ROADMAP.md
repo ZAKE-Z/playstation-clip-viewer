@@ -4,7 +4,7 @@
 > **Goal**: Comprehensive unit testing to verify authentication flow and token stability.
 
 ## Must-Haves
-- [ ] Test infrastructure setup (mockito, build_runner)
+- [x] Test infrastructure setup (mockito, build_runner)
 - [ ] Unit tests for NPSSO exchange logic
 - [ ] Unit tests for Token Refresh logic (expiration checks, storage)
 - [ ] Verify `PsnAuthService` handles network errors gracefully
@@ -12,7 +12,7 @@
 ## Phases
 
 ### Phase 1: Test Foundation
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Configure testing environment and generate mocks
 
 - Add `mockito` and `build_runner` dependencies
