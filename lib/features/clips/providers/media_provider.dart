@@ -60,15 +60,17 @@ class MediaList extends _$MediaList {
   }
 
   Future<MediaListState> _fetchInitialPage() async {
-    final authState = await ref.read(authProvider.future);
-    if (authState is! Authenticated) {
+    // Check for valid tokens (and refresh if needed)
+    final tokens = await ref.read(authProvider.notifier).getValidTokens();
+
+    if (tokens == null) {
       return const MediaListState(error: 'Not authenticated');
     }
 
     try {
       final mediaService = ref.read(psnMediaServiceProvider);
       final result = await mediaService.getMediaGallery(
-        accessToken: authState.tokens.accessToken,
+        accessToken: tokens.accessToken,
       );
 
       // Store the CloudFront cookies for image requests
@@ -94,13 +96,14 @@ class MediaList extends _$MediaList {
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
-    final authState = await ref.read(authProvider.future);
-    if (authState is! Authenticated) return;
+    // Check for valid tokens (and refresh if needed)
+    final tokens = await ref.read(authProvider.notifier).getValidTokens();
+    if (tokens == null) return;
 
     try {
       final mediaService = ref.read(psnMediaServiceProvider);
       final result = await mediaService.getMediaGallery(
-        accessToken: authState.tokens.accessToken,
+        accessToken: tokens.accessToken,
         cursor: currentState.nextCursor,
       );
 

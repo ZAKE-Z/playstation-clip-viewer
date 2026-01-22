@@ -171,10 +171,17 @@ class PsnAuthService {
     if (tokens.needsRefresh || tokens.isExpired) {
       try {
         return await refreshTokens(tokens.refreshToken);
+      } on PsnAuthException catch (e) {
+        // Only clear tokens if the server explicitly rejected the refresh token (400/401)
+        if (e.statusCode == 400 || e.statusCode == 401) {
+          await _tokenStorage.clearTokens();
+          return null;
+        }
+        // Otherwise (Network error, etc.), rethrow to preserve session
+        rethrow;
       } catch (e) {
-        // Refresh failed, clear tokens
-        await _tokenStorage.clearTokens();
-        return null;
+        // Unknown error, rethrow
+        rethrow;
       }
     }
 

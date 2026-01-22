@@ -202,7 +202,34 @@ void main() {
       verify(mockTokenStorage.clearTokens()).called(1);
     });
 
-    test('clears tokens if refresh fails', () async {
+    test('clears tokens if refresh returns 400/401', () async {
+      final expiredTokens = testTokens.copyWith(
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      when(
+        mockTokenStorage.loadTokens(),
+      ).thenAnswer((_) async => expiredTokens);
+
+      when(
+        mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          response: Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 400,
+          ),
+        ),
+      );
+
+      final result = await authService.getValidTokens();
+
+      expect(result, isNull);
+      verify(mockTokenStorage.clearTokens()).called(1);
+    });
+
+    test('rethrows error if refresh fails with network error', () async {
       final expiredTokens = testTokens.copyWith(
         expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
       );
@@ -215,10 +242,11 @@ void main() {
         mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
       ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
 
-      final result = await authService.getValidTokens();
-
-      expect(result, isNull);
-      verify(mockTokenStorage.clearTokens()).called(1);
+      expect(
+        () => authService.getValidTokens(),
+        throwsA(isA<PsnAuthException>()),
+      );
+      verifyNever(mockTokenStorage.clearTokens());
     });
   });
 }

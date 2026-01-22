@@ -63,6 +63,29 @@ class Auth extends _$Auth {
     }
   }
 
+  /// Ensure we have valid tokens (refreshing if necessary)
+  /// Returns null if session is invalid/expired
+  Future<PsnTokens?> getValidTokens() async {
+    try {
+      final authService = ref.read(psnAuthServiceProvider);
+      final tokens = await authService.getValidTokens();
+
+      if (tokens != null) {
+        // Update state with fresh tokens
+        state = AsyncValue.data(Authenticated(tokens));
+        return tokens;
+      } else {
+        // Session expired (refresh failed)
+        await logout();
+        return null;
+      }
+    } catch (e) {
+      // Propagate error (e.g. Network error) so UI can handle it
+      // Do not return null here, as that implies "Logged Out"
+      rethrow;
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     // Clear server-side session and webview data

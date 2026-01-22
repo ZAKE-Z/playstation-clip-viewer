@@ -1,56 +1,83 @@
 # PS Clips Viewer (Unofficial)
 
-A desktop application to view and download your PlayStation game clips and screenshots on Windows.
+> **Status**: v1.0.0 (Stable Release) | **Testing**: v1.1 (Verified)
 
-![PS Clips Banner](https://placeholder.com/banner.png)
+A native Windows desktop application to view and download your PlayStation game clips and screenshots. Built with Flutter, it provides a fast, secure, and modern interface for your PS5 interactions.
 
-## Features
+## ✨ Features
 
-- **📷 Media Gallery**: View all your recent gameplay clips and screenshots in a clean grid.
-- **🔐 Secure Login**: Standard PlayStation login flow with 2FA support.
-- **⬇️ Download**: Save videos (MP4) and screenshots (JPG/PNG) directly to your PC.
-- **📼 Video Preview**: Watch clips before downloading.
-- **📄 Metadata**: View game titles, upload dates, and file sizes.
+- **Media Gallery**: Grid layout of your recent gameplay clips and screenshots.
+- **Secure Authentication**: Official Sony login flow with 2FA support.
+- **Direct Downloads**: Save videos (MP4) and screenshots (JPG/PNG) directly to your PC.
+- **Video Preview**: Watch clips immediately within the app before downloading.
+- **Metadata**: View game titles, upload dates, and duration details.
+- **Native Experience**: Optimized window management and responsive grid.
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Installation
-1. Download the latest `psclips-vX.X.X.zip` release.
-2. Extract the zip file to a folder.
-3. Run `psclips.exe`.
+1. Go to the [Releases](https://github.com/yourusername/psn-clips/releases) page.
+2. Download `psclips-v1.0.0.zip`.
+3. Extract the contents to any folder.
+4. Run `psclips.exe`.
 
-### How to Use
-1. **Login**: Click "Sign in with PlayStation". A window will open to the official Sony login page. Enter your credentials.
-2. **Browse**: Once logged in, your media will load automatically. Scroll down to load more.
-3. **View & Download**: Click any item to view details. Click the **Download** icon to save it to your computer.
-4. **Refresh**: Pull down on the grid or click the Refresh icon in the top right to check for new uploads.
+### Usage Guide
+1. **Sign In**: Launch the app and sign in with your PlayStation Network account. 
+   *(Note: The login window connects strictly to `sonyentertainmentnetwork.com`)*.
+2. **Browse**: Your library auto-loads. Pull down or click refresh to sync recent captures.
+3. **Download**: Click any clip to open the Detail View, then hit the **Download** button to save.
 
-## Development
+## 🛠 For Developers
 
-Prerequisites:
-- [Flutter SDK](https://docs.flutter.dev/get-started/install)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) (with C++ desktop workload)
+### Tech Stack
+- **Framework**: Flutter (Windows Desktop)
+- **State Management**: Riverpod (Code Generation)
+- **Networking**: Dio
+- **Auth**: Direct OAuth2 flow via `desktop_webview_window`
+- **Video**: `video_player_win` + `chewie`
+- **Testing**: Mockito + Flutter Test
+
+### Setup
+Prerequisites: [Flutter SDK](https://docs.flutter.dev/get-started/install) and [Visual Studio 2022 (C++)](https://visualstudio.microsoft.com/).
 
 ```bash
-# Clone the repository
+# 1. Clone repo
 git clone https://github.com/yourusername/psn-clips.git
+cd psclips
 
-# Install dependencies
+# 2. Install dependencies
 flutter pub get
 
-# Run in debug mode
-flutter run -d windows
+# 3. Generate code (Riverpod/Mocks)
+dart run build_runner build --delete-conflicting-outputs
 
-# Build release version
-flutter build windows --release
+# 4. Run app
+flutter run -d windows
 ```
 
-## Privacy & Security
+### Testing (v1.1 Verified)
+We maintain high coverage of the critical authentication logic.
 
-- **Direct Connection**: This app communicates directly with PlayStation Network APIs. No intermediate servers are used.
-- **Token Storage**: Authentication tokens are stored securely on your device using Windows Credential Locker.
-- **Open Source**: The code is available for audit.
+```bash
+# Run unit tests
+flutter test
+```
 
-## Disclaimer
+**Key Test Coverage:**
+- ✅ **NPSSO Exchange**: Verifies redirect parsing for auth codes.
+- ✅ **Token Lifecycle**: Verifies auto-refresh of access tokens.
+- ✅ **Persistence**: Ensures tokens are securely encrypted via Windows Credential Locker.
 
-This is an unofficial fan-made application and is not affiliated with, endorsed, sponsored, or approved by Sony Interactive Entertainment Inc. "PlayStation" is a registered trademark of Sony Interactive Entertainment Inc.
+## 🔒 Security & Privacy
+
+- **Zero Middlemen**: This app communicates **directly** between your PC and Sony's servers. No data is sent to us.
+- **Secure Storage**: Sensitive tokens are stored using `flutter_secure_storage`, which uses the **Windows Credential Locker**.
+- **Ephemeral Session**: The login WebView session is isolated and cleared on logout.
+
+## ⚠️ Disclaimer
+
+This is a third-party tool. It is **not** official software from Sony Interactive Entertainment.
+"PlayStation", "PSN", and "PS5" are registered trademarks of Sony Interactive Entertainment Inc.
+
+---
+*Created with ❤️ by the PSN Clips Community*
