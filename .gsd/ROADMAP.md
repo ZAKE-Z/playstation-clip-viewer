@@ -1,43 +1,23 @@
 # ROADMAP.md
 
-> **Current Milestone**: v1.1-testing
-> **Goal**: Comprehensive unit testing to verify authentication flow and token stability.
+> **Current Milestone**: None
+> **Goal**: Awaiting new milestone definition.
 
 ## Must-Haves
-- [x] Test infrastructure setup (mockito, build_runner)
-- [x] Unit tests for NPSSO exchange logic
-- [x] Unit tests for Token Refresh logic (expiration checks, storage)
-- [x] Verify `PsnAuthService` handles network errors gracefully
+- [ ] Define new milestone goals
 
 ## Phases
-
-### Phase 1: Test Foundation
-**Status**: ✅ Complete
-**Objective**: Configure testing environment and generate mocks
-
-- Add `mockito` and `build_runner` dependencies
-- Create mock classes for `FlutterSecureStorage` and `Dio`
-- Set up test helpers and fixtures
-
-### Phase 2: Auth Logic Verification
-**Status**: ✅ Complete
-**Objective**: Test the core authentication exchange flow
-
-- Test `PsnAuthService.exchangeNpssoForCode`
-- Test `PsnAuthService.exchangeCodeForTokens`
-- Verify correct parsing of API responses
-- Verify error handling for invalid grants
-
-### Phase 3: Token Management & Refresh
-**Status**: ✅ Complete
-**Objective**: Verify long-term session stability
-
-- Test `TokenStorage` persistence
-- Verify `PsnAuthService.getValidTokens` auto-refresh logic
-- Test session expiration and logout triggerson
-- Verify automatic refresh triggers when loading valid tokens
+<!-- Phases will be added here -->
 
 ---
+
+## History
+
+### v1.1-testing (Completed)
+> **Goal**: Comprehensive unit testing and storage refactoring.
+- ✅ **Phase 1**: Test Foundation
+- ✅ **Phase 2**: Auth Logic Verification
+- ✅ **Phase 3**: Token Management & Refresh (+ Storage Refactoring)
 
 ## History
 

@@ -15,6 +15,7 @@ import 'package:dio/src/transformer.dart' as _i5;
 import 'package:flutter/foundation.dart' as _i13;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i8;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:psclips/core/services/logger_service.dart' as _i14;
 import 'package:psclips/core/storage/token_storage.dart' as _i9;
 import 'package:psclips/features/auth/data/token_model.dart' as _i11;
 
@@ -1455,4 +1456,40 @@ class MockFlutterSecureStorage extends _i1.Mock
             returnValueForMissingStub: _i10.Future<bool?>.value(),
           )
           as _i10.Future<bool?>);
+}
+
+/// A class which mocks [LoggerService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockLoggerService extends _i1.Mock implements _i14.LoggerService {
+  @override
+  _i10.Future<void> logError(
+    String? message, [
+    dynamic error,
+    StackTrace? stackTrace,
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#logError, [message, error, stackTrace]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
+
+  @override
+  _i10.Future<String?> getLogFilePath() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLogFilePath, []),
+            returnValue: _i10.Future<String?>.value(),
+            returnValueForMissingStub: _i10.Future<String?>.value(),
+          )
+          as _i10.Future<String?>);
+
+  @override
+  _i10.Future<void> clearLog() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearLog, []),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
 }

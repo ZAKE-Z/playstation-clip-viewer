@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/services/psn_media_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/media_item.dart';
 
@@ -61,13 +62,13 @@ class MediaList extends _$MediaList {
 
   Future<MediaListState> _fetchInitialPage() async {
     // Check for valid tokens (and refresh if needed)
-    final tokens = await ref.read(authProvider.notifier).getValidTokens();
-
-    if (tokens == null) {
-      return const MediaListState(error: 'Not authenticated');
-    }
-
     try {
+      final tokens = await ref.read(authProvider.notifier).getValidTokens();
+
+      if (tokens == null) {
+        return const MediaListState(error: 'Not authenticated');
+      }
+
       final mediaService = ref.read(psnMediaServiceProvider);
       final result = await mediaService.getMediaGallery(
         accessToken: tokens.accessToken,
@@ -80,7 +81,9 @@ class MediaList extends _$MediaList {
         items: result.response.ugcDocument,
         nextCursor: result.response.nextCursorMark,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      final logger = ref.read(loggerServiceProvider);
+      logger.logError('Error fetching initial media page', e, stack);
       return MediaListState(error: e.toString());
     }
   }
@@ -96,11 +99,11 @@ class MediaList extends _$MediaList {
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
-    // Check for valid tokens (and refresh if needed)
-    final tokens = await ref.read(authProvider.notifier).getValidTokens();
-    if (tokens == null) return;
-
     try {
+      // Check for valid tokens (and refresh if needed)
+      final tokens = await ref.read(authProvider.notifier).getValidTokens();
+      if (tokens == null) return;
+
       final mediaService = ref.read(psnMediaServiceProvider);
       final result = await mediaService.getMediaGallery(
         accessToken: tokens.accessToken,
@@ -116,7 +119,10 @@ class MediaList extends _$MediaList {
           nextCursor: result.response.nextCursorMark,
         ),
       );
-    } catch (e) {
+    } catch (e, stack) {
+      final logger = ref.read(loggerServiceProvider);
+      logger.logError('Error loading more media', e, stack);
+
       state = AsyncValue.data(
         currentState.copyWith(isLoading: false, error: e.toString()),
       );

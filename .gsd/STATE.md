@@ -4,12 +4,17 @@
 
 ## Current Position
 
-- **Milestone**: v1.1-testing
-- **Phase**: 3 (Token Management & Refresh)
-- **Task**: Execution complete
-- **Status**: Verified
+- **Milestone**: v1.1-testing (Completed)
+- **Phase**: All Complete
+- **Status**: ✅ Milestone Finalized
 
 ## What Was Just Accomplished
+
+### Refactoring: Storage Directories
+- **Configurable**: Implemented `getAppDirectory()` in `storage_utils.dart` to use executable's parent folder on Desktop.
+- **Logs**: `LoggerService` now writes logs to the app directory.
+- **WebView**: `PsnLoginWebview` stores data in `webview_data` within the app directory.
+- **Tests**: Mocked `LoggerService` to silence expected error logs during testing.
 
 ### Phase 3: Token Management & Refresh
 - **Verified**: Token persistence logic with `TokenStorage` tests.

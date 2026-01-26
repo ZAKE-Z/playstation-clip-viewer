@@ -1,0 +1,51 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'logger_service.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(loggerService)
+const loggerServiceProvider = LoggerServiceProvider._();
+
+final class LoggerServiceProvider
+    extends $FunctionalProvider<LoggerService, LoggerService, LoggerService>
+    with $Provider<LoggerService> {
+  const LoggerServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'loggerServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$loggerServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<LoggerService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LoggerService create(Ref ref) {
+    return loggerService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LoggerService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LoggerService>(value),
+    );
+  }
+}
+
+String _$loggerServiceHash() => r'3dcedfa04198ae6c72361f6201ffe685347afbd1';

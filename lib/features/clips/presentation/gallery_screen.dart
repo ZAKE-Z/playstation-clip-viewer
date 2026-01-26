@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/image_cache_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/media_provider.dart';
 import 'media_grid_item.dart';
@@ -110,6 +112,70 @@ class GalleryScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+            );
+          }
+
+          if (state.error != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Unable to load clips',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.error.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: () =>
+                              ref.read(mediaListProvider.notifier).refresh(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                        const SizedBox(width: 16),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            // Open log file logic
+                            final logger = ref.read(loggerServiceProvider);
+                            final path = await logger.getLogFilePath();
+                            if (path != null) {
+                              // Open explorer with file selected
+                              final result = await Process.run('explorer.exe', [
+                                '/select,',
+                                path,
+                              ]);
+                              if (result.exitCode != 0) {
+                                // Fallback: just open the folder
+                                // Not critical if fails
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.description),
+                          label: const Text('Open Log'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           }

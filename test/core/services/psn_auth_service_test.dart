@@ -13,6 +13,7 @@ void main() {
   late PsnAuthService authService;
   late MockDio mockDio;
   late MockTokenStorage mockTokenStorage;
+  late MockLoggerService mockLogger;
 
   final testTokens = PsnTokens(
     accessToken: 'access_123',
@@ -24,7 +25,12 @@ void main() {
   setUp(() {
     mockDio = MockDio();
     mockTokenStorage = MockTokenStorage();
-    authService = PsnAuthService(dio: mockDio, tokenStorage: mockTokenStorage);
+    mockLogger = MockLoggerService();
+    authService = PsnAuthService(
+      dio: mockDio,
+      tokenStorage: mockTokenStorage,
+      logger: mockLogger,
+    );
   });
 
   group('PsnAuthService.getCodeFromNpsso', () {
@@ -202,7 +208,7 @@ void main() {
       verify(mockTokenStorage.clearTokens()).called(1);
     });
 
-    test('clears tokens if refresh returns 400/401', () async {
+    test('clears tokens if refresh returns 401', () async {
       final expiredTokens = testTokens.copyWith(
         expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
       );
@@ -218,7 +224,33 @@ void main() {
           requestOptions: RequestOptions(path: ''),
           response: Response(
             requestOptions: RequestOptions(path: ''),
-            statusCode: 400,
+            statusCode: 401,
+          ),
+        ),
+      );
+
+      final result = await authService.getValidTokens();
+
+      expect(result, isNull);
+      verify(mockTokenStorage.clearTokens()).called(1);
+    });
+    test('clears tokens if refresh returns 403', () async {
+      final expiredTokens = testTokens.copyWith(
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      when(
+        mockTokenStorage.loadTokens(),
+      ).thenAnswer((_) async => expiredTokens);
+
+      when(
+        mockDio.post(any, data: anyNamed('data'), options: anyNamed('options')),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          response: Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 403,
           ),
         ),
       );

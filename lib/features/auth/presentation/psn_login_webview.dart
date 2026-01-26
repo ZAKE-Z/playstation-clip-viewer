@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:psclips/core/utils/storage_utils.dart';
 import '../../../core/constants/psn_api.dart';
 import '../providers/auth_provider.dart';
 
@@ -34,7 +34,7 @@ class PsnLoginWebview {
     }
 
     // Get user data folder for WebView
-    final appDir = await getApplicationSupportDirectory();
+    final appDir = await getAppDirectory();
     final userDataFolder = '${appDir.path}/webview_data';
 
     // Clear previous session data to ensure fresh login
@@ -95,7 +95,7 @@ class PsnLoginWebview {
     final isAvailable = await WebviewWindow.isWebviewAvailable();
     if (!isAvailable) return;
 
-    final appDir = await getApplicationSupportDirectory();
+    final appDir = await getAppDirectory();
     final userDataFolder = '${appDir.path}/webview_data';
 
     try {

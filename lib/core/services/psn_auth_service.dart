@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../constants/psn_api.dart';
 import '../storage/token_storage.dart';
 import '../../features/auth/data/token_model.dart';
+import 'logger_service.dart';
 
 /// Exception for PSN auth errors
 class PsnAuthException implements Exception {
@@ -18,10 +19,12 @@ class PsnAuthException implements Exception {
 class PsnAuthService {
   final Dio _dio;
   final TokenStorage _tokenStorage;
+  final LoggerService _logger;
 
-  PsnAuthService({Dio? dio, TokenStorage? tokenStorage})
+  PsnAuthService({Dio? dio, TokenStorage? tokenStorage, LoggerService? logger})
     : _dio = dio ?? Dio(),
-      _tokenStorage = tokenStorage ?? TokenStorage();
+      _tokenStorage = tokenStorage ?? TokenStorage(),
+      _logger = logger ?? LoggerService();
 
   /// Exchange NPSSO token for OAuth code
   /// Returns the authorization code from the redirect URL
@@ -59,11 +62,13 @@ class PsnAuthService {
       }
 
       return code;
-    } on DioException catch (e) {
-      throw PsnAuthException(
-        'Network error: ${e.message}',
-        statusCode: e.response?.statusCode,
-      );
+    } on DioException catch (e, stack) {
+      final msg = 'Network error during NPSSO exchange: ${e.message}';
+      _logger.logError(msg, e, stack);
+      throw PsnAuthException(msg, statusCode: e.response?.statusCode);
+    } catch (e, stack) {
+      _logger.logError('Unexpected error during NPSSO exchange', e, stack);
+      rethrow;
     }
   }
 
@@ -100,17 +105,22 @@ class PsnAuthService {
 
       await _tokenStorage.saveTokens(tokens);
       return tokens;
-    } on DioException catch (e) {
-      throw PsnAuthException(
-        'Token exchange failed: ${e.message}',
-        statusCode: e.response?.statusCode,
-      );
+    } on DioException catch (e, stack) {
+      final msg = 'Token exchange failed: ${e.message}';
+      _logger.logError(msg, e, stack);
+      throw PsnAuthException(msg, statusCode: e.response?.statusCode);
+    } catch (e, stack) {
+      _logger.logError('Unexpected error during token exchange', e, stack);
+      rethrow;
     }
   }
 
   /// Refresh tokens using refresh token
   Future<PsnTokens> refreshTokens(String refreshToken) async {
     try {
+      _logger.logError(
+        'Attempting to refresh tokens...',
+      ); // Info log disguised as error for now to ensure we see it
       final response = await _dio.post(
         '${PsnApi.oauthBaseUrl}/token',
         data: {
@@ -142,11 +152,14 @@ class PsnAuthService {
 
       await _tokenStorage.saveTokens(tokens);
       return tokens;
-    } on DioException catch (e) {
-      throw PsnAuthException(
-        'Token refresh failed: ${e.message}',
-        statusCode: e.response?.statusCode,
-      );
+    } on DioException catch (e, stack) {
+      final msg =
+          'Token refresh failed: ${e.message} (Status: ${e.response?.statusCode})';
+      _logger.logError(msg, e, stack);
+      throw PsnAuthException(msg, statusCode: e.response?.statusCode);
+    } catch (e, stack) {
+      _logger.logError('Unexpected error during token refresh', e, stack);
+      rethrow;
     }
   }
 
@@ -163,6 +176,7 @@ class PsnAuthService {
 
     // Check if refresh token is expired
     if (tokens.isRefreshExpired) {
+      _logger.logError('Refresh token expired. Clearing tokens.');
       await _tokenStorage.clearTokens();
       return null;
     }
@@ -173,14 +187,19 @@ class PsnAuthService {
         return await refreshTokens(tokens.refreshToken);
       } on PsnAuthException catch (e) {
         // Only clear tokens if the server explicitly rejected the refresh token (400/401)
-        if (e.statusCode == 400 || e.statusCode == 401) {
+        if (e.statusCode == 400 || e.statusCode == 401 || e.statusCode == 403) {
+          _logger.logError(
+            'Refresh rejected (${e.statusCode}). Clearing tokens.',
+          );
           await _tokenStorage.clearTokens();
           return null;
         }
         // Otherwise (Network error, etc.), rethrow to preserve session
+        _logger.logError('Refresh failed but session preserved: ${e.message}');
         rethrow;
-      } catch (e) {
+      } catch (e, stack) {
         // Unknown error, rethrow
+        _logger.logError('Unknown error checking tokens', e, stack);
         rethrow;
       }
     }
@@ -190,6 +209,7 @@ class PsnAuthService {
 
   /// Logout - clear stored tokens
   Future<void> logout() async {
+    _logger.logError('Logging out user.');
     await _tokenStorage.clearTokens();
   }
 }
