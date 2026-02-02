@@ -6,7 +6,7 @@ A desktop application to view and download your PlayStation game clips and scree
 
 ## Preface
 
-This tool was built using AI as a way for me to test the capabilities of LLMs in building a desktop application. While the PSN API has been reverse-engineered by others, I could not find any information about the endpoint for the Playstation cloud gallery, so I had to reverse-engineer it myself using an Android device, a patched version of the PS Mobile app, and Fiddler to intercept the requests and responses. I then used Google's Antigravity tool to use my findings and write code for a desktop application. This is the result.
+This tool was built using AI as a way for me to test the capabilities of LLMs in building a desktop application. While the PSN API has been reverse-engineered by others, I could not find any information about the endpoint for the PlayStation cloud gallery, so I had to reverse-engineer it myself using an Android device, a patched version of the PS Mobile app, and Fiddler to intercept the requests and responses. I then used Google's Antigravity tool to use my findings and write code for a desktop application. This is the result.
 
 ## ✨ Features
 
