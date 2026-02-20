@@ -129,9 +129,25 @@ class MediaList extends _$MediaList {
     }
   }
 
-  /// Refresh from start
+  /// Refresh from start (shows loading)
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = AsyncValue.data(await _fetchInitialPage());
+  }
+
+  /// Background refresh - fetches new data without showing loading state
+  Future<void> refreshInBackground() async {
+    final currentState = state.value;
+    if (currentState == null || currentState.isLoading) return;
+
+    try {
+      final newState = await _fetchInitialPage();
+      if (newState.error == null) {
+        state = AsyncValue.data(newState);
+      }
+    } catch (e, stack) {
+      final logger = ref.read(loggerServiceProvider);
+      logger.logError('Background refresh failed', e, stack);
+    }
   }
 }

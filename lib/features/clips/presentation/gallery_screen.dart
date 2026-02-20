@@ -1,25 +1,66 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/image_cache_service.dart';
 import '../../../core/services/logger_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../settings/presentation/settings_screen.dart';
 import '../providers/media_provider.dart';
 import 'media_grid_item.dart';
 import 'detail_screen.dart';
 
-class GalleryScreen extends ConsumerWidget {
+/// Interval for background auto-refresh
+const _autoRefreshInterval = Duration(minutes: 2);
+
+class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GalleryScreen> createState() => _GalleryScreenState();
+}
+
+class _GalleryScreenState extends ConsumerState<GalleryScreen> {
+  Timer? _autoRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoRefresh();
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoRefresh() {
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = Timer.periodic(_autoRefreshInterval, (_) {
+      ref.read(mediaListProvider.notifier).refreshInBackground();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final mediaState = ref.watch(mediaListProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('PS Clips'),
         actions: [
-          // Refresh button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',

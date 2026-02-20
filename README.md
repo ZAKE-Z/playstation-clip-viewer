@@ -13,6 +13,7 @@ This tool was built using AI as a way for me to test the capabilities of LLMs in
 - **Media Gallery**: Grid layout of your recent gameplay clips and screenshots.
 - **Secure Authentication**: Official Sony login flow with 2FA support.
 - **Direct Downloads**: Save videos (MP4) and screenshots (JPG/PNG) directly to your PC.
+- **ShareX Upload Integration**: Import your ShareX .sxcu config and upload clips/screenshots directly to your own server or image host.
 - **Video Preview**: Watch clips immediately within the app before downloading.
 
 ## 📖 How to Use
@@ -87,7 +88,7 @@ flutter test
 
 ## 📝 Todo
 - [ ] Multi-account support
-- [ ] Auto-refresh logic (background fetch)
+- [X] Auto-refresh logic (background fetch)
 - [ ] Scheduled auto refresh and downloading
 - [ ] Simple video trimming
 
