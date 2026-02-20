@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build and Release Windows
 
 on:
   push:
@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -34,12 +36,21 @@ jobs:
         shell: pwsh
         run: |
           $version = (Get-Content pubspec.yaml | Select-String '^version:').ToString().Split('+')[0].Replace('version: ', '').Trim()
-          $artifactName = "psclips-v$version.zip"
+          $commitHash = git rev-parse --short HEAD
+          $artifactName = "psclips-windows-v$version-$commitHash.zip"
           Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath $artifactName
           echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
+          echo "VERSION=$version" >> $env:GITHUB_ENV
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
         with:
-          name: psclips-windows
-          path: ${{ env.ARTIFACT_NAME }}
+          name: Build ${{ env.VERSION }} - ${{ github.sha }}
+          tag_name: build-${{ github.sha }}
+          files: ${{ env.ARTIFACT_NAME }}
+          generate_release_notes: true
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
