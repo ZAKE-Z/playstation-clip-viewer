@@ -1,22 +1,27 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/services/psn_media_service.dart';
 import '../../../../core/services/download_service.dart';
+import '../../../../core/services/upload_service.dart';
+import '../../settings/presentation/settings_screen.dart';
+import '../../upload/providers/upload_settings_provider.dart';
 import '../data/media_item.dart';
 
-class DetailScreen extends StatefulWidget {
+class DetailScreen extends ConsumerStatefulWidget {
   final MediaItem item;
   final CloudFrontCookies? cookies;
 
   const DetailScreen({super.key, required this.item, required this.cookies});
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _DetailScreenState extends ConsumerState<DetailScreen> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   bool _isError = false;
@@ -80,8 +85,11 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   final _downloadService = DownloadService();
+  final _uploadService = UploadService();
   bool _isDownloading = false;
+  bool _isUploading = false;
   double _downloadProgress = 0.0;
+  double _uploadProgress = 0.0;
 
   Future<void> _handleDownload() async {
     if (_isDownloading) return;
@@ -124,12 +132,87 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
+  Future<void> _handleUpload(BuildContext context) async {
+    if (_isUploading) return;
+
+    final config = await ref.read(uploadConfigProvider.future);
+    if (config == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Import a ShareX config in Settings to upload',
+            ),
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+      _uploadProgress = 0.0;
+    });
+
+    await _uploadService.uploadMedia(
+      widget.item,
+      config: config,
+      cookies: widget.cookies,
+      onProgress: (progress) {
+        if (mounted) {
+          setState(() {
+            _uploadProgress = progress;
+          });
+        }
+      },
+      onSuccess: (result) {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+          if (result.responseUrl != null && result.responseUrl!.isNotEmpty) {
+            Clipboard.setData(ClipboardData(text: result.responseUrl!));
+          }
+          final msg = result.responseUrl != null
+              ? 'Uploaded! URL copied to clipboard'
+              : 'Upload complete!';
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Upload failed: $error')));
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item.sceTitleName),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.cloud_upload),
+            onPressed: _isUploading ? null : () => _handleUpload(context),
+            tooltip: 'Upload',
+          ),
           IconButton(
             icon: const Icon(Icons.download),
             onPressed: _isDownloading ? null : _handleDownload,
@@ -193,6 +276,30 @@ class _DetailScreenState extends State<DetailScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
+                    onPressed: _isUploading ? null : () => _handleUpload(context),
+                    icon: _isUploading
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              value:
+                                  _uploadProgress > 0 ? _uploadProgress : null,
+                            ),
+                          )
+                        : const Icon(Icons.cloud_upload),
+                    label: Text(
+                      _isUploading
+                          ? 'Uploading ${(_uploadProgress * 100).toInt()}%'
+                          : 'Upload',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
                     onPressed: _isDownloading ? null : _handleDownload,
                     icon: _isDownloading
                         ? SizedBox(
