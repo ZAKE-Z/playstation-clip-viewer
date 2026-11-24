@@ -1,6 +1,8 @@
 # PS5 Media Gallery for Linux
 
-A headless Debian companion that archives your own PlayStation clips and screenshots to WebDAV. Its English, PlayStation-inspired web interface supports previews, batch downloads with restart recovery, per-file retries, and verified local-video cleanup. It does not need Flutter, a desktop session, or a browser installed on the server.
+[简体中文](README.zh-CN.md) · English
+
+A headless Debian companion that archives your own PlayStation clips and screenshots to WebDAV. Its bilingual, PlayStation-inspired web interface supports previews, batch downloads with restart recovery, per-file retries, and verified local-video cleanup. It does not need Flutter, a desktop session, or a browser installed on the server.
 
 This is an unofficial companion to [PlayStation Clip Viewer](https://github.com/CallMeTak/playstation-clip-viewer). The upstream Flutter app is unchanged; this companion lives in `linux-headless/`. It uses Sony endpoints that may change or reject nonstandard clients. No Sony credentials are distributed with the companion.
 
@@ -18,6 +20,8 @@ This is an unofficial companion to [PlayStation Clip Viewer](https://github.com/
 
    Open <http://127.0.0.1:18765/>. No LAN HTTP port is opened by default.
 5. In **System Settings → Sony sign-in**, open Sony's sign-in and session pages in the same browser session. Finish sign-in and paste only the `npsso` value into the dashboard. Do not put it in an issue, log, or command line. Then set a writable WebDAV destination under **System Settings → WebDAV storage**; HTTPS is recommended.
+
+Use **EN / 中文** in the dashboard header to change the interface language. The choice is saved in the current browser.
 
 ## Daily use
 

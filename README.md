@@ -3,7 +3,9 @@
 > [!TIP]
 > **Looking for the headless Debian web gallery?**
 >
-> **[Linux setup and usage guide →](linux-headless/README.md)**
+> **[English setup and usage guide →](linux-headless/README.md)** · **[简体中文安装与使用说明 →](linux-headless/README.zh-CN.md)**
+>
+> The web interface supports English and Simplified Chinese.
 
 > **Status**: v1.1 (Stable Release)
 
