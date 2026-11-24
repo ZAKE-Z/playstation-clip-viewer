@@ -1,6 +1,9 @@
 # PS Clips Viewer (Unofficial)
 
-**Looking for the headless Debian web gallery?** See the [Linux setup and usage guide](linux-headless/README.md).
+> [!TIP]
+> **Looking for the headless Debian web gallery?**
+>
+> **[Linux setup and usage guide →](linux-headless/README.md)**
 
 > **Status**: v1.1 (Stable Release)
 
