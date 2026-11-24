@@ -1,0 +1,27 @@
+[Unit]
+Description=PS5 capture backup and private Web administration
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=psclips
+Group=psclips
+ExecStart=/usr/bin/python3 /opt/psclips/psclips-admin.py
+Environment=LANG=C.UTF-8 LC_ALL=C.UTF-8
+EnvironmentFile=-/etc/psclips/psclips.env
+StateDirectory=psclips
+StateDirectoryMode=0700
+RuntimeDirectory=psclips
+RuntimeDirectoryMode=0750
+UMask=0077
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+*.cred
+*.key
+*.crt
+*.sqlite3*
+*.env
+__pycache__/

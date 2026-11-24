@@ -1,5 +1,7 @@
 # PS Clips Viewer (Unofficial)
 
+**Looking for the headless Debian web gallery?** See the [Linux setup and usage guide](linux-headless/README.md).
+
 > **Status**: v1.1 (Stable Release)
 
 A desktop application to view and download your PlayStation game clips and screenshots. Built with Flutter. Compatible with Windows/Linux/Mac, but only tested and built on Windows for now.
